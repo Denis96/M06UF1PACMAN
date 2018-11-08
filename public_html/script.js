@@ -47,6 +47,10 @@ var fantasma3 = [
   0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
   0    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
 ];
+var fantasma4 = [
+  0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
+  0    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
+];
 var pacman = [
   0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
   0,    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
@@ -71,11 +75,13 @@ function move() {
     moveO(fantasma1);
     moveO(fantasma2);
     moveO(fantasma3);
+    moveO(fantasma4);
     
     direccionar(pacman);
     direccionar(fantasma1);
     direccionar(fantasma2);
     direccionar(fantasma3);
+    direccionar(fantasma4);
     
     
     out=printM(out);
@@ -83,17 +89,19 @@ function move() {
 }
 
 function inicializar(){ // o(bjeto)= fantasmas o jugador
-    ubicar(pacman, fantasma1, fantasma2, fantasma3);
-    ubicar(fantasma1, fantasma2, fantasma3, pacman);
-    ubicar(fantasma2, fantasma3, pacman, fantasma1);
-    ubicar(fantasma3, pacman, fantasma1, fantasma2);
+    ubicar(pacman, fantasma1, fantasma2, fantasma3, fantasma4);
+    ubicar(fantasma1, fantasma2, fantasma3, fantasma4, pacman);
+    ubicar(fantasma2, fantasma3, fantasma4, pacman, fantasma1);
+    ubicar(fantasma3, fantasma4, pacman, fantasma1, fantasma2);
+    ubicar(fantasma4, pacman, fantasma1, fantasma2, fantasma3);
     direccionar(pacman);
     direccionar(fantasma1);
     direccionar(fantasma2);
     direccionar(fantasma3);
+    direccionar(fantasma4);
 }
 
-function ubicar(o, o1, o2, o3){ // o(bjeto)= fantasmas o jugador
+function ubicar(o, o1, o2, o3, o4){ // o(bjeto)= fantasmas o jugador
     var p = new Array(2);
     do {
         p[0]= parseInt( (Math.random() * ( mapa.length-1) ) +1 );
@@ -145,38 +153,40 @@ function moveO(o) {
 function printM(out){
     for (var i=0 ; i<mapa.length ; i++) {
         for (var j=0 ; j<mapa[i].length ; j++) {
-            if          (pacman[0]==i && pacman[1]==j ) {       out=printMP(pacman,out);
-            } else if   (fantasma1[0]==i && fantasma1[1]==j) {  out=printMF(fantasma1,out);
-            } else if   (fantasma2[0]==i && fantasma2[1]==j) {  out=printMF(fantasma2,out);
-            } else if   (fantasma3[0]==i && fantasma3[1]==j) {  out=printMF(fantasma3,out);
+            if          (pacman[0]==i && pacman[1]==j ) {       out=out+"<span style=\"color:yellow\">"+printMF(pacman)+"</span>";//out=out+printMP(pacman);
+            } else if   (fantasma1[0]==i && fantasma1[1]==j) {  out=out+"<span style=\"color:red\">"+printMF(fantasma1)+"</span>";
+            } else if   (fantasma2[0]==i && fantasma2[1]==j) {  out=out+"<span style=\"color:cyan\">"+printMF(fantasma2)+"</span>";
+            } else if   (fantasma3[0]==i && fantasma3[1]==j) {  out=out+"<span style=\"color:orange\">"+printMF(fantasma3)+"</span>";
+            } else if   (fantasma4[0]==i && fantasma4[1]==j) {  out=out+"<span style=\"color:fuchsia\">"+printMF(fantasma4)+"</span>";
             } else {
                 mapa[i][j]==1 ? out=out+"&#9724;" : out=out+"&#9723;";
             }
         }
         out=out+"<br>";
     }
-    out=out+"<br>";
     document.getElementById("map").innerHTML = out;
 }
-function printMP(o, out){
+function printMP(o){ //
+    var direccion ="";
     switch(o[2]) {
-        case 1: out=out+"&#9650;"; break; // ▲
-        case 2: out=out+"&#9654;"; break; // ►
-        case 3: out=out+"&#9660;"; break; // ▼
-        case 4: out=out+"&#9664;"; break; // ◄
-        default: out=out+"P ";
+        case 1: direccion="&#9650;"; break; // ▲
+        case 2: direccion="&#9654;"; break; // ►
+        case 3: direccion="&#9660;"; break; // ▼
+        case 4: direccion="&#9664;"; break; // ◄
+        default: direccion="P ";
     }
-    return out;
+    return direccion;
 }
-function printMF(o, out){      
+function printMF(o){  
+    var direccion ="";    
     switch(o[2]) {
-        case 1: out=out+"&#9651;"; break; // △
-        case 2: out=out+"&#9655;"; break; // ▷
-        case 3: out=out+"&#9661;"; break; // ▽
-        case 4: out=out+"&#9665;"; break; // ◁
-        default: out=out+"F ";
+        case 1: direccion="&#9651;"; break; // △
+        case 2: direccion="&#9655;"; break; // ▷
+        case 3: direccion="&#9661;"; break; // ▽
+        case 4: direccion="&#9665;"; break; // ◁
+        default: direccion="F ";
     }
-    return out;
+    return direccion;
 }
 
 
@@ -188,6 +198,7 @@ function logf() {
     log=log+print_r(fantasma1)+"<br>";
     log=log+print_r(fantasma2)+"<br>";
     log=log+print_r(fantasma3)+"<br>";
+    log=log+print_r(fantasma4)+"<br>";
     return log;
 }
 function print_r(arr,level) {
