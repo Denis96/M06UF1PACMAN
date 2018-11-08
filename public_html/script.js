@@ -159,7 +159,7 @@ function printM(out){
             } else if   (fantasma3[0]==i && fantasma3[1]==j) {  out=out+"<span style=\"color:orange\">"+printMF(fantasma3)+"</span>";
             } else if   (fantasma4[0]==i && fantasma4[1]==j) {  out=out+"<span style=\"color:fuchsia\">"+printMF(fantasma4)+"</span>";
             } else {
-                mapa[i][j]==1 ? out=out+"&#9724;" : out=out+"&#9723;";
+                mapa[i][j]==1 ? out=out+"&#9724;" : out=out+"<span style=\"color:black\">&#9723;</span>";
             }
         }
         out=out+"<br>";
