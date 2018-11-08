@@ -168,7 +168,8 @@ function printMP(o, out){
     }
     return out;
 }
-function printMF(o, out){      
+function printMF(o, out){
+    //out=out+"&#5603;"; // ghost
     switch(o[2]) {
         case 1: out=out+"&#9651;"; break; // △
         case 2: out=out+"&#9655;"; break; // ▷
