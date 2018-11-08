@@ -94,7 +94,7 @@ function escogerCamino(o, camino){ // o=objeto ||  camino=camino elegido
     n=1; //el camino que va a probar
     if (mapa[ o[0]-1 ][ o[1] ]==0 ) { if (n==camino){return 1;}else{n++;} }
     if (mapa[ o[0] ][ o[1]+1 ]==0 ) { if (n==camino){return 2;}else{n++;} }
-    if (mapa[ o[0]+1 ][ o[1]+1 ]==0 ) { if (n==camino){return 3;}else{n++;} }
+    if (mapa[ o[0]+1 ][ o[1] ]==0 ) { if (n==camino){return 3;}else{n++;} }
     if (mapa[ o[0] ][ o[1]-1 ]==0 ) { if (n==camino){return 4;}else{n++;} }
 }
 
