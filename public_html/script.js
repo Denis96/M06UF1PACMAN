@@ -53,6 +53,35 @@ var pacman = [
   1    // cambio dirección (1=up,2=right,3=down,4=left, 0=undefined)
 ];
 
+
+function myFunction() {
+    var out = "";
+    inicializar();
+    
+    out=printM(out);
+    
+    document.getElementById("log").innerHTML = logf();
+}
+function play() {
+    play = setInterval(function(){ move() }, 300);
+}
+function move() {
+    var out="";
+    moveO(pacman);
+    moveO(fantasma1);
+    moveO(fantasma2);
+    moveO(fantasma3);
+    
+    direccionar(pacman);
+    direccionar(fantasma1);
+    direccionar(fantasma2);
+    direccionar(fantasma3);
+    
+    
+    out=printM(out);
+    document.getElementById("log").innerHTML = logf();
+}
+
 function inicializar(){ // o(bjeto)= fantasmas o jugador
     ubicar(pacman, fantasma1, fantasma2, fantasma3);
     ubicar(fantasma1, fantasma2, fantasma3, pacman);
@@ -77,13 +106,14 @@ function ubicar(o, o1, o2, o3){ // o(bjeto)= fantasmas o jugador
 function direccionar(o, m){ // m= dirección actual || o=objeto
     var camino = 0;
     if (m == null) {
-        camino = parseInt( ( Math.random() * (totalPosibles(o)) )+1 );
+        camino = parseInt( ( Math.random() * (totalPosibles(o)-1) )+1 );
         //alert(camino);
         o[2]=escogerCamino(o, camino);
     } /*else {
         
     }*/
 }
+
 function totalPosibles(o){ // m= dirección actual || o=objeto
     var n=0;
     if (mapa[ o[0]-1 ][ o[1] ]==0 ) { n++; }
@@ -92,18 +122,27 @@ function totalPosibles(o){ // m= dirección actual || o=objeto
     if (mapa[ o[0] ][ o[1]-1 ]==0 ) { n++; }
     return n;
 }
+
 function escogerCamino(o, camino){ // o=objeto ||  camino=camino elegido
     var n=1; //el camino que va a probar
-    if (mapa[ o[0]-1 ][ o[1] ]==0 ) { if (n==camino){return 1;}else{n++;} }
-    if (mapa[ o[0] ][ o[1]+1 ]==0 ) { if (n==camino){return 2;}else{n++;} }
-    if (mapa[ o[0]+1 ][ o[1] ]==0 ) { if (n==camino){return 3;}else{n++;} }
-    if (mapa[ o[0] ][ o[1]-1 ]==0 ) { if (n==camino){return 4;}else{n++;} }
+    // si la posicion esta vacia y si no es la sdirección contraria
+    if (mapa[ o[0]-1 ][ o[1] ]==0 && o[2]!=3 ) { if (n==camino){return 1;}else{n++;} }
+    if (mapa[ o[0] ][ o[1]+1 ]==0 && o[2]!=4 ) { if (n==camino){return 2;}else{n++;} }
+    if (mapa[ o[0]+1 ][ o[1] ]==0 && o[2]!=1 ) { if (n==camino){return 3;}else{n++;} }
+    if (mapa[ o[0] ][ o[1]-1 ]==0 && o[2]!=2 ) { if (n==camino){return 4;}else{n++;} }
 }
 
-function myFunction() {
-    var log = "";
-    inicializar();
-    var out = "";
+function moveO(o) {
+    switch(o[2]) {
+        case 1: o[0]--; break; // ▲
+        case 2: o[1]++; break; // ►
+        case 3: o[0]++; break; // ▼
+        case 4: o[1]--; break; // ◄
+    }
+    
+}
+
+function printM(out){
     for (var i=0 ; i<mapa.length ; i++) {
         for (var j=0 ; j<mapa[i].length ; j++) {
             if          (pacman[0]==i && pacman[1]==j ) {       out=printMP(pacman,out);
@@ -117,17 +156,15 @@ function myFunction() {
         out=out+"<br>";
     }
     out=out+"<br>";
-    
     document.getElementById("map").innerHTML = out;
-    document.getElementById("log").innerHTML = logf();
 }
 function printMP(o, out){
     switch(o[2]) {
         case 1: out=out+"&#9650;"; break; // ▲
-        case 2: out=out+"&#9658;"; break; // ►
+        case 2: out=out+"&#9654;"; break; // ►
         case 3: out=out+"&#9660;"; break; // ▼
-        case 4: out=out+"&#9668;"; break; // ◄
-        default: out=out+"P "
+        case 4: out=out+"&#9664;"; break; // ◄
+        default: out=out+"P ";
     }
     return out;
 }
@@ -137,7 +174,7 @@ function printMF(o, out){
         case 2: out=out+"&#9655;"; break; // ▷
         case 3: out=out+"&#9661;"; break; // ▽
         case 4: out=out+"&#9665;"; break; // ◁
-        default: out=out+"F "
+        default: out=out+"F ";
     }
     return out;
 }
@@ -153,8 +190,6 @@ function logf() {
     log=log+print_r(fantasma3)+"<br>";
     return log;
 }
-
-
 function print_r(arr,level) {
   var dumped_text = "(";
   if(!level) level = 0;
