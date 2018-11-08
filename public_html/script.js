@@ -35,6 +35,17 @@ var mapa = [
     /*32*/[1, 1, 1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1]
     ];
     
+var pacs = new Array();
+for ( var i=0 ; i<mapa.length ; i++) {
+    pacs[i]=new Array();
+    for ( var j=0 ; j<mapa[i].length ; j++) {
+        if ( !(i==0 || i==mapa.length || j==0 || j==mapa[i].length)){
+            mapa[i][j]==0 ? pacs[i][j]=1 : pacs[i][j]=0;
+        } else {
+            pacs[i][j]=0;
+        }
+    }
+}
 var fantasma1 = [
   0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
   0    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
@@ -67,10 +78,11 @@ function myFunction() {
     document.getElementById("log").innerHTML = logf();
 }
 function play() {
-    play = setInterval(function(){ move() }, 300);
+    play = setInterval(function(){ move() }, 100);
 }
 function move() {
     var out="";
+    comerPac(pacman);
     moveO(pacman);
     moveO(fantasma1);
     moveO(fantasma2);
@@ -140,6 +152,11 @@ function escogerCamino(o, camino){ // o=objeto ||  camino=camino elegido
     if (mapa[ o[0] ][ o[1]-1 ]==0 && o[2]!=2 ) { if (n==camino){return 4;}else{n++;} }
 }
 
+function comerPac(o) {
+    if ( pacs[ o[0] ][ o[1] ] == 1 ) {
+        pacs[ o[0] ][ o[1] ]=0;
+    } 
+}
 function moveO(o) {
     switch(o[2]) {
         case 1: o[0]--; break; // ▲
@@ -158,6 +175,7 @@ function printM(out){
             } else if   (fantasma2[0]==i && fantasma2[1]==j) {  out=out+"<span style=\"color:cyan\">"+printMF(fantasma2)+"</span>";
             } else if   (fantasma3[0]==i && fantasma3[1]==j) {  out=out+"<span style=\"color:orange\">"+printMF(fantasma3)+"</span>";
             } else if   (fantasma4[0]==i && fantasma4[1]==j) {  out=out+"<span style=\"color:fuchsia\">"+printMF(fantasma4)+"</span>";
+            } else if   (pacs[i][j]==1) {   out=out+"<span style=\"color:silver\">&#9723;</span>";
             } else {
                 mapa[i][j]==1 ? out=out+"&#9724;" : out=out+"<span style=\"color:black\">&#9723;</span>";
             }
@@ -199,6 +217,7 @@ function logf() {
     log=log+print_r(fantasma2)+"<br>";
     log=log+print_r(fantasma3)+"<br>";
     log=log+print_r(fantasma4)+"<br>";
+    log=log+print_r(pacs[1])+"<br>";
     return log;
 }
 function print_r(arr,level) {
