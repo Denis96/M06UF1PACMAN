@@ -34,18 +34,24 @@ var mapa = [
     /*31*/[1, 0, 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,1],
     /*32*/[1, 1, 1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1]
     ];
-    
+   
+// los pacs serian equivalente a los dots del pacman, pero al ser cuadrados los llame "pacs" 
 var pacs = new Array();
-for ( var i=0 ; i<mapa.length ; i++) {
-    pacs[i]=new Array();
-    for ( var j=0 ; j<mapa[i].length ; j++) {
-        if ( !(i==0 || i==mapa.length-1 || j==0 || j==mapa[i].length-1) ){
-            mapa[i][j]==0 ? pacs[i][j]=1 : pacs[i][j]=0;
-        } else {
-            pacs[i][j]=0;
+    fillPacs();
+
+function fillPacs() {
+    for ( var i=0 ; i<mapa.length ; i++) {
+        pacs[i]=new Array();
+        for ( var j=0 ; j<mapa[i].length ; j++) {
+            if ( !(i==0 || i==mapa.length-1 || j==0 || j==mapa[i].length-1) ){
+                mapa[i][j]==0 ? pacs[i][j]=1 : pacs[i][j]=0;
+            } else {
+                pacs[i][j]=0;
+            }
         }
     }
 }
+
 var fantasma1 = [
   0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
   0    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
@@ -71,6 +77,14 @@ var pacman = [
 
 function myFunction() {
     var out = "";
+    var controls = "";
+        controls=controls+"<button style=\"margin-right: 10px;\" onclick=\"play()\">Play</button>";
+        controls=controls+"<button onclick=\"reset()\">Restart</button>";
+    controls=controls+"<hr/>";
+    
+    document.getElementById("start").innerHTML = "";
+    document.getElementById("controls").innerHTML = controls;
+    
     inicializar();
     
     out=printM(out);
@@ -78,7 +92,15 @@ function myFunction() {
     document.getElementById("log").innerHTML = logf();
 }
 function play() {
-    play = setInterval(function(){ move() }, 50);
+    play = setInterval(function(){ move() }, 250);
+}
+function reset() {
+    var out ="";
+    clearInterval(play);
+    fillPacs();
+    inicializar();
+    out=printM(out);
+    document.getElementById("log").innerHTML = logf();
 }
 function move() {
     var out="";
@@ -100,7 +122,7 @@ function move() {
     document.getElementById("log").innerHTML = logf();
 }
 
-function inicializar(){ // o(bjeto)= fantasmas o jugador
+function inicializar(){ // ubica y direcciona todos los objetos
     ubicar(pacman, fantasma1, fantasma2, fantasma3, fantasma4);
     ubicar(fantasma1, fantasma2, fantasma3, fantasma4, pacman);
     ubicar(fantasma2, fantasma3, fantasma4, pacman, fantasma1);
@@ -113,28 +135,38 @@ function inicializar(){ // o(bjeto)= fantasmas o jugador
     direccionar(fantasma4);
 }
 
-function ubicar(o, o1, o2, o3, o4){ // o(bjeto)= fantasmas o jugador
+function ubicar(o, o1, o2, o3, o4){ // o(bjeto)= fantasmas o jugador || oX = demas objetos
     var p = new Array(2);
     do {
-        p[0]= parseInt( (Math.random() * ( mapa.length-1) ) +1 );
-        p[1]= parseInt( (Math.random() * ( mapa[0].length-1) ) +1 );
-    }while(mapa[p[0]][p[1]]==1);
+        p[0]= parseInt( (Math.random() * ( mapa.length-2) ) +1 );
+        p[1]= parseInt( (Math.random() * ( mapa[p[0]].length-2) ) +1 );
+    }while(mapa[p[0]][p[1]]==1  ||  (p[0]==o1[0] && p[1]==o1[1])  ||  (p[0]==o2[0] && p[1]==o2[1])  ||  (p[0]==o3[0] && p[1]==o3[1])  ||  (p[0]==o4[0] && p[1]==o4[1]));
+    // escoge un casilla aleatoria lible donde no esté otro objeto
     o[0]=p[0];
     o[1]=p[1];
 }
 
-function direccionar(o, m){ // m= dirección actual || o=objeto
+function direccionar(o, m){ // o=objeto que queremos direccionar || m=null
     var camino = 0;
     if (!(o[0]==0 || o[0]==mapa.length-1 || o[1]==0 || o[1]==mapa[o[1]].length-1)) {
+        // si esta en un borde del mapa, su direccion no cambiará
+        
         camino = parseInt( ( Math.random() * (totalPosibles(o)-1) )+1 );
-        //alert(camino);
+        // genera un numero aletorio entre todos los caminos posibles
+            // pd: se quita uno porque nunca volverá hacia atras (en mi mapa nunca habrá un callejón)
+                // nota: no lo llegar a probar del todo, pero si entra en un callejón, vuelve,
+                    //  pero no he terminado de probar esta caracteristica porque yo no la uso
+        
         o[2]=escogerCamino(o, camino);
+        // guarda la dirección del camino elegido
+        
+        
     //} /*else {
         
     }
 }
 
-function totalPosibles(o){ // m= dirección actual || o=objeto
+function totalPosibles(o){ // o=objeto // cuenta todos los caminos posibles
     var n=0;
     if (mapa[ o[0]-1 ][ o[1] ]==0 ) { n++; }
     if (mapa[ o[0] ][ o[1]+1 ]==0 ) { n++; }
@@ -145,7 +177,7 @@ function totalPosibles(o){ // m= dirección actual || o=objeto
 
 function escogerCamino(o, camino){ // o=objeto ||  camino=camino elegido
     var n=1; //el camino que va a probar
-    // si la posicion esta vacia y si no es la sdirección contraria
+    // si la posicion esta vacia y si no es la dirección contraria
     if (mapa[ o[0]-1 ][ o[1] ]==0 && o[2]!=3 ) { if (n==camino){return 1;}else{n++;} }
     if (mapa[ o[0] ][ o[1]+1 ]==0 && o[2]!=4 ) { if (n==camino){return 2;}else{n++;} }
     if (mapa[ o[0]+1 ][ o[1] ]==0 && o[2]!=1 ) { if (n==camino){return 3;}else{n++;} }
@@ -153,11 +185,17 @@ function escogerCamino(o, camino){ // o=objeto ||  camino=camino elegido
 }
 
 function comerPac(o) {
+     // si  en l aposicion actual del pacman hay un pac, lo elimina
     if ( pacs[ o[0] ][ o[1] ] == 1 ) {
         pacs[ o[0] ][ o[1] ]=0;
+        
+        // AÑADIR SUMAR 1 A LA PUNTUACIÓN
+        
     } 
 }
 function moveO(o) {
+    // si esta en un borde del mapa yuendo a esa dirección, teletransporta el objeto
+        // sino lo mueve
     if ( o[0]==0 && o[2]==1) { o[0]=mapa.length-1;
     } else if ( o[1]==mapa[o[0]].length-1 && o[2]==2) { o[1]=0;
     } else if ( o[0]==mapa.length-1 && o[2]==3) { o[0]=0;
@@ -222,6 +260,8 @@ function logf() {
     log=log+print_r(fantasma2)+"<br>";
     log=log+print_r(fantasma3)+"<br>";
     log=log+print_r(fantasma4)+"<br>";
+    log=log+print_r(mapa[1])+"<br>";
+    log=log+print_r(mapa[9])+"<br>";
     return log;
 }
 function print_r(arr,level) {
