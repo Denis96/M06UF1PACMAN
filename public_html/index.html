@@ -10,12 +10,19 @@
 		<div>
 			<p>Hola mundo!</p>
 			<hr/>
-			<button onclick="myFunction()">Start</button>
-			<button onclick="play()">play</button>
-			<hr/>
-                        <!-- <script>myFunction();</script> -->
-			<p style="background-color:black;color:blue;line-height:1;" id="map"></p>
-			<p style="line-height:1.2;" id="log"></p>
+                        <div id="start">
+                            <button onclick="myFunction()">Start</button>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="controls">
+                                <!-- button: play() -->
+                                <!-- button: reset() -->
+                            </div>
+                            <div>
+                                <p style="background-color:black;color:blue;line-height:1;" id="map"></p>
+                            </div>
+                        </div>
+                        <p style="line-height:1.2;" id="log"></p>
 		</div>
 	</body>
 </html>
