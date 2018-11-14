@@ -36,21 +36,30 @@ var mapa = [
     ];
    
 // los pacs serian equivalente a los dots del pacman, pero al ser cuadrados los llame "pacs" 
+var totalPacs = 0; // sirve para decir cuando acaba el juego
 var pacs = new Array();
     fillPacs();
 
+// fillPacs: llena todas la matriz donde hay 0 con pacs y marca el total de pacs
+    // nota: no rellena los bordes
 function fillPacs() {
+    totalPacs = 0;
     for ( var i=0 ; i<mapa.length ; i++) {
         pacs[i]=new Array();
         for ( var j=0 ; j<mapa[i].length ; j++) {
             if ( !(i==0 || i==mapa.length-1 || j==0 || j==mapa[i].length-1) ){
-                mapa[i][j]==0 ? pacs[i][j]=1 : pacs[i][j]=0;
-            } else {
-                pacs[i][j]=0;
-            }
+                if (mapa[i][j]==0) {
+                    pacs[i][j]=1;totalPacs++;
+                } else { pacs[i][j]=0 };
+            } else { pacs[i][j]=0; }
         }
     }
 }
+
+var play = null;
+
+var puntos = 0;
+var muerte = false;
 
 var fantasma1 = [
   0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
@@ -71,14 +80,14 @@ var fantasma4 = [
 var pacman = [
   0,0,  // posición !! [0]=FILA(X) [1]=COLUMNA(Y) !!
   0,    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
-  1    // cambio dirección (1=up,2=right,3=down,4=left, 0=undefined)
+  0    // cambio dirección (1=up,2=right,3=down,4=left, 0=undefined)
 ];
 
 
 function myFunction() {
     var out = "";
     var controls = "";
-        controls=controls+"<button style=\"margin-right: 10px;\" onclick=\"play()\">Play</button>";
+        controls=controls+"<button style=\"margin-right: 10px;\" onclick=\"playGame()\">Play</button>";
         controls=controls+"<button onclick=\"reset()\">Restart</button>";
     controls=controls+"<hr/>";
     
@@ -91,12 +100,15 @@ function myFunction() {
     
     document.getElementById("log").innerHTML = logf();
 }
-function play() {
-    play = setInterval(function(){ move() }, 250);
+function playGame() {
+    !muerte ? play = setInterval(move, 50) : "";
+}
+function end() {
+    clearInterval(play);
 }
 function reset() {
     var out ="";
-    clearInterval(play);
+    end();
     fillPacs();
     inicializar();
     out=printM(out);
@@ -105,20 +117,28 @@ function reset() {
 function move() {
     var out="";
     comerPac(pacman);
-    moveO(pacman);
+    if (pacman[3]==0){
+        moveO(pacman);
+    } else {
+        
+    }
+        colision();
     moveO(fantasma1);
     moveO(fantasma2);
     moveO(fantasma3);
     moveO(fantasma4);
-    
+        colision();
     direccionar(pacman);
     direccionar(fantasma1);
     direccionar(fantasma2);
     direccionar(fantasma3);
     direccionar(fantasma4);
     
-    
-    out=printM(out);
+    if (!muerte) {
+        out=printM(out);
+    } else {
+        out=printMuerte(out);
+    }
     document.getElementById("log").innerHTML = logf();
 }
 
@@ -133,6 +153,8 @@ function inicializar(){ // ubica y direcciona todos los objetos
     direccionar(fantasma2);
     direccionar(fantasma3);
     direccionar(fantasma4);
+    puntos=0;
+    muerte=false;
 }
 
 function ubicar(o, o1, o2, o3, o4){ // o(bjeto)= fantasmas o jugador || oX = demas objetos
@@ -159,10 +181,17 @@ function direccionar(o, m){ // o=objeto que queremos direccionar || m=null
         
         o[2]=escogerCamino(o, camino);
         // guarda la dirección del camino elegido
-        
-        
-    //} /*else {
-        
+    //} /*else {}
+    }
+}
+
+function colision() {
+    if (    (pacman[0]==fantasma1[0]&&pacman[1]==fantasma1[1]) ||
+            (pacman[0]==fantasma2[0]&&pacman[1]==fantasma2[1]) ||
+            (pacman[0]==fantasma3[0]&&pacman[1]==fantasma3[1]) ||
+            (pacman[0]==fantasma4[0]&&pacman[1]==fantasma4[1]) ) {
+        end();
+        muerte=true;
     }
 }
 
@@ -189,7 +218,7 @@ function comerPac(o) {
     if ( pacs[ o[0] ][ o[1] ] == 1 ) {
         pacs[ o[0] ][ o[1] ]=0;
         
-        // AÑADIR SUMAR 1 A LA PUNTUACIÓN
+        puntos++;
         
     } 
 }
@@ -209,6 +238,9 @@ function moveO(o) {
         }
     }
 }
+function moveOP(){
+    
+}
 
 function printM(out){
     for (var i=0 ; i<mapa.length ; i++) {
@@ -225,6 +257,8 @@ function printM(out){
         }
         out=out+"<br>";
     }
+    out=printPuntos(out);
+    //out=out+"<br><span style=\"color:yellow;font-family:courier\">Pacs: "+puntos+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max:"+totalPacs+"</span><br><br>";
     document.getElementById("map").innerHTML = out;
 }
 function printMP(o){ //
@@ -248,6 +282,29 @@ function printMF(o){
         default: direccion="F ";
     }
     return direccion;
+}
+function printPuntos(out){
+    out=out+"<br><span style=\"color:yellow;font-family:courier\">Pacs: "+puntos;
+    out=out+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    if (muerte) {out=out+"<span style=\"color:red\">HAS MUERTO</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";}
+    out=out+"Max:"+totalPacs+"</span><br><br>";
+    return out;
+}
+
+function printMuerte(out){
+    for (var i=0 ; i<mapa.length ; i++) {
+        for (var j=0 ; j<mapa[i].length ; j++) {
+            if (pacman[0]==i && pacman[1]==j ) {
+                out=out+"<span style=\"color:yellow\">"+printMF(pacman)+"</span>";
+            } else {
+                mapa[i][j]==1 ? out=out+"<span style=\"color:red\">&#9724;</span>" : out=out+"<span style=\"color:black\">&#9723;</span>";
+            }
+        }
+        out=out+"<br>";
+    }
+    out=printPuntos(out);
+    //out=out+"<br><span style=\"color:yellow;font-family:courier\">Pacs: "+puntos+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max:"+totalPacs+"</span><br><br>";
+    document.getElementById("map").innerHTML = out;
 }
 
 
