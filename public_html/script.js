@@ -82,7 +82,14 @@ var pacman = [
   0,    // dirección (1=up,2=right,3=down,4=left, 0=undefined)
   0    // cambio dirección (1=up,2=right,3=down,4=left, 0=undefined)
 ];
-
+function restablecerO() {
+    fantasma1 = [0, 0, 0];
+    fantasma2 = [0, 0, 0];
+    fantasma3 = [0, 0, 0];
+    fantasma4 = [0, 0, 0];
+    pacman = [0, 0, 0, 0];
+}
+var tecla = document.getElementById("all");
 
 function myFunction() {
     var out = "";
@@ -97,11 +104,11 @@ function myFunction() {
     inicializar();
     
     out=printM(out);
-    
     document.getElementById("log").innerHTML = logf();
 }
 function playGame() {
-    !muerte ? play = setInterval(move, 50) : "";
+    end();
+    !muerte ? play = setInterval(move, 250) : "";
 }
 function end() {
     clearInterval(play);
@@ -110,6 +117,7 @@ function reset() {
     var out ="";
     end();
     fillPacs();
+    restablecerO();
     inicializar();
     out=printM(out);
     document.getElementById("log").innerHTML = logf();
@@ -117,25 +125,24 @@ function reset() {
 function move() {
     var out="";
     comerPac(pacman);
-    if (pacman[3]==0){
-        moveO(pacman);
-    } else {
-        
-    }
+    document.onkeydown = teclado;
+    direccionar(pacman);
+    direccionar(fantasma1);
+    direccionar(fantasma2);
+    direccionar(fantasma3);
+    direccionar(fantasma4);
+    moveO(pacman);
         colision();
     moveO(fantasma1);
     moveO(fantasma2);
     moveO(fantasma3);
     moveO(fantasma4);
         colision();
-    direccionar(pacman);
-    direccionar(fantasma1);
-    direccionar(fantasma2);
-    direccionar(fantasma3);
-    direccionar(fantasma4);
     
     if (!muerte) {
         out=printM(out);
+    } else if (puntos==totalPacs) {
+        out=printVictoria(out);
     } else {
         out=printMuerte(out);
     }
@@ -168,31 +175,56 @@ function ubicar(o, o1, o2, o3, o4){ // o(bjeto)= fantasmas o jugador || oX = dem
     o[1]=p[1];
 }
 
-function direccionar(o, m){ // o=objeto que queremos direccionar || m=null
-    var camino = 0;
-    if (!(o[0]==0 || o[0]==mapa.length-1 || o[1]==0 || o[1]==mapa[o[1]].length-1)) {
-        // si esta en un borde del mapa, su direccion no cambiará
-        
-        camino = parseInt( ( Math.random() * (totalPosibles(o)-1) )+1 );
-        // genera un numero aletorio entre todos los caminos posibles
-            // pd: se quita uno porque nunca volverá hacia atras (en mi mapa nunca habrá un callejón)
-                // nota: no lo llegar a probar del todo, pero si entra en un callejón, vuelve,
-                    //  pero no he terminado de probar esta caracteristica porque yo no la uso
-        
-        o[2]=escogerCamino(o, camino);
-        // guarda la dirección del camino elegido
-    //} /*else {}
+function teclado(e){ // direccion que llega por teclado
+    var key = document.all ? e.which : e.key;
+    if (key=="ArrowUp"){
+        pacman[3] = 1; // arriba
+    }
+    else if (key == "ArrowRight"){
+        pacman[3] = 2; // derecha
+    }
+    else if (key =="ArrowDown"){
+        pacman[3] = 3; // izquierda
+    }
+    else if (key == "ArrowLeft"){
+        pacman[3] = 4; // abajo
     }
 }
 
-function colision() {
-    if (    (pacman[0]==fantasma1[0]&&pacman[1]==fantasma1[1]) ||
-            (pacman[0]==fantasma2[0]&&pacman[1]==fantasma2[1]) ||
-            (pacman[0]==fantasma3[0]&&pacman[1]==fantasma3[1]) ||
-            (pacman[0]==fantasma4[0]&&pacman[1]==fantasma4[1]) ) {
-        end();
-        muerte=true;
+function direccionar(o){ // o=objeto que queremos direccionar || m=null
+    var camino = 0;
+    if (!(o[0]==0 || o[0]==mapa.length-1 || o[1]==0 || o[1]==mapa[o[1]].length-1)) {
+        // si esta en un borde del mapa, su direccion no cambiará
+        if (o[3]==null || o[3]==0) {
+            camino = parseInt( ( Math.random() * (totalPosibles(o)-1) )+1 );
+            // genera un numero aletorio entre todos los caminos posibles
+                // pd: se quita uno porque nunca volverá hacia atras (en mi mapa nunca habrá un callejón)
+                    // nota: no lo llegar a probar del todo, pero si entra en un callejón, vuelve,
+                        //  pero no he terminado de probar esta caracteristica porque yo no la uso
+
+            o[2]=escogerCamino(o, camino);
+            // guarda la dirección del camino elegido
+        } else {
+            if (!comprobarCamino(o)) {
+                
+            } else {
+                camino = parseInt( ( Math.random() * (totalPosibles(o)-1) )+1 );
+                o[2]=escogerCamino(o, camino);
+            }
+        }
     }
+}
+
+function comprobarCamino(o){ // o=objeto // cuenta todos los caminos posibles
+    if (    ( o[2]!=1 && mapa[ o[0]-1 ][ o[1] ]==0 ) || 
+            ( o[2]!=2 && mapa[ o[0] ][ o[1]+1 ]==0 ) ||
+            ( o[2]!=3 && mapa[ o[0]+1 ][ o[1] ]==0 ) || 
+            ( o[2]!=4 && mapa[ o[0] ][ o[1]-1 ]==0 ) ) {
+        return true;
+    } else {
+        return false;
+    }
+    
 }
 
 function totalPosibles(o){ // o=objeto // cuenta todos los caminos posibles
@@ -219,13 +251,39 @@ function comerPac(o) {
         pacs[ o[0] ][ o[1] ]=0;
         
         puntos++;
-        
     } 
 }
+
+function colision() {
+    if (    (pacman[0]==fantasma1[0]&&pacman[1]==fantasma1[1]) ||
+            (pacman[0]==fantasma2[0]&&pacman[1]==fantasma2[1]) ||
+            (pacman[0]==fantasma3[0]&&pacman[1]==fantasma3[1]) ||
+            (pacman[0]==fantasma4[0]&&pacman[1]==fantasma4[1]) ) {
+        end();
+        muerte=true;
+    }
+}
 function moveO(o) {
-    // si esta en un borde del mapa yuendo a esa dirección, teletransporta el objeto
+    // si esta en un borde del mapa yendo a esa dirección, teletransporta el objeto
         // sino lo mueve
-    if ( o[0]==0 && o[2]==1) { o[0]=mapa.length-1;
+    if (        o[0]==0 && o[2]==1) {                   o[0]=mapa.length-1;
+    } else if ( o[1]==mapa[o[0]].length-1 && o[2]==2) { o[1]=0;
+    } else if ( o[0]==mapa.length-1 && o[2]==3) {       o[0]=0;
+    } else if ( o[1]==0 && o[2]==4) {                   o[1]=mapa[o[1]].length-1;
+    } else {
+        switch(o[2]) {
+            case 1: o[0]--; break; // ▲
+            case 2: o[1]++; break; // ►
+            case 3: o[0]++; break; // ▼
+            case 4: o[1]--; break; // ◄
+        }
+    }
+}
+function moveOP(o) {
+    // si esta en un borde del mapa yendo a esa dirección, teletransporta el objeto
+        // sino lo mueve
+    if (o[3]!=0 || o[3]!=null) {
+    } else if ( o[0]==0 && o[2]==1) { o[0]=mapa.length-1;
     } else if ( o[1]==mapa[o[0]].length-1 && o[2]==2) { o[1]=0;
     } else if ( o[0]==mapa.length-1 && o[2]==3) { o[0]=0;
     } else if ( o[1]==0 && o[2]==4) { o[1]=mapa[o[1]].length-1;
@@ -237,9 +295,6 @@ function moveO(o) {
             case 4: o[1]--; break; // ◄
         }
     }
-}
-function moveOP(){
-    
 }
 
 function printM(out){
@@ -261,7 +316,7 @@ function printM(out){
     //out=out+"<br><span style=\"color:yellow;font-family:courier\">Pacs: "+puntos+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max:"+totalPacs+"</span><br><br>";
     document.getElementById("map").innerHTML = out;
 }
-function printMP(o){ //
+function printMP(o){ // alternativa para imprimir el jugador
     var direccion ="";
     switch(o[2]) {
         case 1: direccion="&#9650;"; break; // ▲
@@ -286,7 +341,8 @@ function printMF(o){
 function printPuntos(out){
     out=out+"<br><span style=\"color:yellow;font-family:courier\">Pacs: "+puntos;
     out=out+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    if (muerte) {out=out+"<span style=\"color:red\">HAS MUERTO</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";}
+    if (muerte) {out=out+"<span style=\"color:red\">HAS MUERTO</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    } else if (puntos==totalPacs) {out=out+"<span style=\"color:LawnGreen\">HAS GANADO</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";}
     out=out+"Max:"+totalPacs+"</span><br><br>";
     return out;
 }
@@ -307,9 +363,23 @@ function printMuerte(out){
     document.getElementById("map").innerHTML = out;
 }
 
+function printVictoria(out){
+    for (var i=0 ; i<mapa.length ; i++) {
+        for (var j=0 ; j<mapa[i].length ; j++) {
+            if (pacman[0]==i && pacman[1]==j ) {
+                out=out+"<span style=\"color:yellow\">"+printMF(pacman)+"</span>";
+            } else {
+                mapa[i][j]==1 ? out=out+"<span style=\"color:LawnGreen\">&#9724;</span>" : out=out+"<span style=\"color:black\">&#9723;</span>";
+            }
+        }
+        out=out+"<br>";
+    }
+    out=printPuntos(out);
+    //out=out+"<br><span style=\"color:yellow;font-family:courier\">Pacs: "+puntos+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max:"+totalPacs+"</span><br><br>";
+    document.getElementById("map").innerHTML = out;
+}
 
-
-
+// codigo para llevar un "log" del programa
 function logf() {
     var log="";
     log=log+print_r(pacman)+"<br>";
@@ -317,10 +387,13 @@ function logf() {
     log=log+print_r(fantasma2)+"<br>";
     log=log+print_r(fantasma3)+"<br>";
     log=log+print_r(fantasma4)+"<br>";
-    log=log+print_r(mapa[1])+"<br>";
-    log=log+print_r(mapa[9])+"<br>";
+    //log=log+print_r(mapa[1])+"<br>";
+    //log=log+print_r(mapa[9])+"<br>";
     return log;
 }
+
+// codigo sacado de internet para hacer las pruebas
+// este codigo copia al "print_r" de PHP
 function print_r(arr,level) {
   var dumped_text = "(";
   if(!level) level = 0;
