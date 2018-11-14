@@ -78,7 +78,7 @@ function myFunction() {
     document.getElementById("log").innerHTML = logf();
 }
 function play() {
-    play = setInterval(function(){ move() }, 50);
+    play = setInterval(function(){ move() }, 200);
 }
 function move() {
     var out="";
