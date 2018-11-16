@@ -456,27 +456,14 @@ function setCookie(n, expires) {
     name = name.toUpperCase();
     
     var points = "";
+    
     if (puntos <10 ) { points+="00"+puntos;
     } else if (puntos <100 ) { points+="0"+puntos;
     } else { points+=""+puntos; 
     }
     
-    if (n == 1) {
-        document.cookie = "re1Name="+ name +";"+ expires;
-        document.cookie = "re1Points="+ points +";"+ expires;
-    } else if (n == 2) {
-        document.cookie = "re2Name="+ name +";"+ expires;
-        document.cookie = "re2Points="+ points +";"+ expires;
-    } else if (n == 3) {
-        document.cookie = "re3Name="+ name +";"+ expires;
-        document.cookie = "re3Points="+ points +";"+ expires;
-    } else if (n == 4) {
-        document.cookie = "re4Name="+ name +";"+ expires;
-        document.cookie = "re4Points="+ points +";"+ expires;
-    } else if (n == 4) {
-        document.cookie = "re5Name="+ name +";"+ expires;
-        document.cookie = "re5Points="+ points +";"+ expires;
-    }
+    document.cookie = "re"+n+"Name="+ name +";"+ expires;
+    document.cookie = "re"+n+"Points="+ points +";"+ expires;
 }
 // mueve los records hacia abajo si hay uno superior
 function moveRecords(n, expires) {
